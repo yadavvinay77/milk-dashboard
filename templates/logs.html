@@ -1,0 +1,201 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3 class="mb-3">Daily Logs</h3>
+
+<form class="row g-2 mb-3">
+  <div class="col-auto">
+    <input type="date" name="date" class="form-control" value="{{ selected }}">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">Load</button>
+  </div>
+  <div class="col-auto ms-auto">
+    <a class="btn btn-outline-secondary" href="?date={{ selected }}&export=csv">Export CSV</a>
+    <a class="btn btn-outline-secondary" href="?date={{ selected }}&export=xlsx">Export Excel</a>
+    <button class="btn btn-outline-dark" onclick="window.print()">Print</button>
+  </div>
+</form>
+
+<div class="row">
+  <!-- Customer List Sidebar -->
+  <div class="col-md-3">
+    <div class="card mb-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Customers</h5>
+        <a href="{{ url_for('customers_bp.add_customer') }}" class="btn btn-sm btn-primary">+</a>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          {% for customer in customers %}
+          <li class="list-group-item {% if selected_customer and selected_customer.id == customer.id %}active{% endif %}">
+            <a href="{{ url_for('logs_bp.index') }}?date={{ selected }}&customer_id={{ customer.id }}" 
+               class="text-decoration-none {% if selected_customer and selected_customer.id == customer.id %}text-white{% else %}text-dark{% endif %}">
+              {{ customer.name }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="col-md-9">
+    {% if selected_customer %}
+    <!-- Milk Sales Form -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-info text-white">Milk Sales - {{ selected_customer.name }}</div>
+      <div class="card-body">
+        <form method="post" class="row g-2" id="milkForm">
+          <input type="hidden" name="transaction_type" value="milk">
+          <input type="hidden" name="customer_id" value="{{ selected_customer.id }}">
+          <input type="hidden" name="generate_invoice" id="generate_invoice" value="no">
+          <input type="hidden" name="status" id="milk_status">
+          
+          <div class="col-md-2">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" name="date" value="{{ selected }}">
+          </div>
+          
+          <div class="col-md-2">
+            <label class="form-label">Qty (L)</label>
+            <input type="number" step="0.01" class="form-control" name="quantity" value="0" oninput="calculateMilkAmount()">
+          </div>
+          
+          <div class="col-md-2">
+            <label class="form-label">Sample Wt</label>
+            <input type="number" step="0.001" class="form-control" name="sample_weight" value="0.220" oninput="calculateMilkAmount()">
+          </div>
+          
+          <div class="col-md-2">
+            <label class="form-label">Rate</label>
+            <input type="number" step="0.01" class="form-control" name="rate" value="{{ config.DEFAULT_MILK_RATE }}" oninput="calculateMilkAmount()">
+          </div>
+          
+          <div class="col-md-2">
+            <label class="form-label">Amount</label>
+            <input type="number" step="0.01" class="form-control" name="amount" id="milk_amount" readonly>
+          </div>
+          
+          <div class="col-12">
+            <label class="form-label">Note</label>
+            <input type="text" class="form-control" name="note">
+          </div>
+          
+          <div class="col-12 mt-3">
+            <button type="button" name="status" value="Paid" class="btn btn-success" onclick="saveMilkTransaction('Paid')">Paid</button>
+            <button type="button" name="status" value="Credit" class="btn btn-warning" onclick="saveMilkTransaction('Credit')">Credit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Money Transactions Form -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-primary text-white">Money Transactions - {{ selected_customer.name }}</div>
+      <div class="card-body">
+        <form method="post" class="row g-2" id="moneyForm">
+          <input type="hidden" name="transaction_type" value="money">
+          <input type="hidden" name="customer_id" value="{{ selected_customer.id }}">
+          <input type="hidden" name="generate_invoice" id="money_generate_invoice" value="no">
+          <input type="hidden" name="status" id="money_status">
+          
+          <div class="col-md-3">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" name="date" value="{{ selected }}">
+          </div>
+          
+          <div class="col-md-3">
+            <label class="form-label">Amount</label>
+            <input type="number" step="0.01" class="form-control" name="amount" required>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Note</label>
+            <input type="text" class="form-control" name="note">
+          </div>
+          
+          <div class="col-12 mt-3">
+            <button type="button" name="status" value="Credit" class="btn btn-warning" onclick="saveMoneyTransaction('Credit')">Credit</button>
+            <button type="button" name="status" value="Debit" class="btn btn-danger" onclick="saveMoneyTransaction('Debit')">Debit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+      Please select a customer from the left sidebar to add transactions.
+    </div>
+    {% endif %}
+
+    <!-- Transactions List -->
+    <div class="card shadow-sm">
+      <div class="card-header">Transactions for {{ selected|dmy }}{% if selected_customer %} - {{ selected_customer.name }}{% endif %}</div>
+      <div class="card-body table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Date</th><th>Customer</th><th>Type</th><th>Qty</th><th>SampleWt</th><th>Rate</th>
+              <th>Amount</th><th>Status</th><th>Credit</th><th>Debit</th><th>Note</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for x in logs %}
+            <tr>
+              <td>{{ x.date|dmy }}</td>
+              <td>{{ x.customer.name }}</td>
+              <td>{% if x.quantity > 0 %}Milk{% else %}Money{% endif %}</td>
+              <td>{% if x.quantity > 0 %}{{ '%.2f'|format(x.quantity) }}{% else %}—{% endif %}</td>
+              <td>{% if x.sample_weight > 0 %}{{ '%.3f'|format(x.sample_weight) }}{% else %}—{% endif %}</td>
+              <td>{% if x.rate > 0 %}{{ '%.2f'|format(x.rate) }}{% else %}—{% endif %}</td>
+              <td>₹ {{ '%.2f'|format(x.amount) }}</td>
+              <td>
+                {% set s = (x.status or '').lower() %}
+                <span class="badge {% if s=='paid' %}bg-success{% elif s=='credit' %}bg-warning text-dark{% elif s=='debit' %}bg-danger{% else %}bg-secondary{% endif %}">{{ x.status }}</span>
+              </td>
+              <td>{% if s == 'credit' and x.quantity == 0 %}₹ {{ '%.2f'|format(x.amount) }}{% else %}—{% endif %}</td>
+              <td>{% if s == 'debit' %}₹ {{ '%.2f'|format(x.amount) }}{% else %}—{% endif %}</td>
+              <td>{{ x.note }}</td>
+              <td>
+                <a href="{{ url_for('logs_bp.index') }}?date={{ x.date }}&edit={{ x.id }}&customer_id={{ x.customer_id }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <form method="post" action="{{ url_for('logs_bp.delete', id=x.id) }}" class="d-inline" onsubmit="return confirm('Delete this transaction?')">
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+                <a href="{{ url_for('logs_bp.invoice', id=x.id) }}" class="btn btn-sm btn-outline-info">Invoice</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function calculateMilkAmount() {
+    const qty = parseFloat(document.querySelector('#milkForm input[name="quantity"]').value) || 0;
+    const sampleWeight = parseFloat(document.querySelector('#milkForm input[name="sample_weight"]').value) || 0.220;
+    const rate = parseFloat(document.querySelector('#milkForm input[name="rate"]').value) || 0;
+    const amount = qty * sampleWeight * rate;
+    document.getElementById('milk_amount').value = amount.toFixed(2);
+}
+
+function saveMilkTransaction(status) {
+    document.getElementById('milk_status').value = status;
+    document.getElementById('generate_invoice').value = 'yes';
+    document.getElementById('milkForm').submit();
+}
+
+function saveMoneyTransaction(status) {
+    document.getElementById('money_status').value = status;
+    document.getElementById('money_generate_invoice').value = 'yes';
+    document.getElementById('moneyForm').submit();
+}
+
+// Initialize form
+document.addEventListener('DOMContentLoaded', function() {
+    calculateMilkAmount();
+});
+</script>
+{% endblock %}

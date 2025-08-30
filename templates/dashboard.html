@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3 class="mb-3">Dashboard</h3>
+
+{% include "partials/date_filters.html" %}
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted">Total Milk Sold</div><div class="fs-3">{{ '%.2f'|format(total_qty) }} L</div></div></div></div>
+  <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted">Total Revenue</div><div class="fs-3">₹ {{ '%.2f'|format(total_revenue) }}</div></div></div></div>
+  <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted">Total Customers</div><div class="fs-3">{{ total_customers }}</div></div></div></div>
+</div>
+
+<div class="card shadow-sm mb-3">
+  <div class="card-header">Last 7 days (Quantity)</div>
+  <div class="card-body">
+    <ul class="list-inline mb-0">
+      {% for d, q in trend %}
+        <li class="list-inline-item badge bg-light text-dark border">{{ d|dmy }}: {{ '%.2f'|format(q) }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>List of the Transactions</span>
+    {% include "partials/export_buttons.html" %}
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>Date</th><th>Customer</th><th>Qty</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for x in logs %}
+          <tr>
+            <td>{{ x.date|dmy }}</td>
+            <td>{{ x.customer.name }}</td>
+            <td>{{ '%.2f'|format(x.quantity) }}</td>
+            <td>₹ {{ '%.2f'|format(x.amount) }}</td>
+            <td>
+              {% set s = (x.status or '').lower() %}
+              <span class="badge {% if s=='paid' %}bg-success{% elif s=='credit' %}bg-warning text-dark{% elif s=='debit' %}bg-danger{% else %}bg-secondary{% endif %}">{{ x.status }}</span>
+            </td>
+            <td>
+              <a href="{{ url_for('logs_bp.index') }}?date={{ x.date }}&edit={{ x.id }}" class="btn btn-sm btn-outline-primary">Edit</a>
+              <form method="post" action="{{ url_for('logs_bp.delete', id=x.id) }}" class="d-inline" onsubmit="return confirm('Delete this transaction?')">
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

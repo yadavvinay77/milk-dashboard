@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3 class="mb-3">Monthly / Range Summary</h3>
+
+{% include "partials/date_filters.html" %}
+
+<div class="card shadow-sm">
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>Status</th><th>Count</th><th>Total Qty</th><th>Total Amount</th></tr></thead>
+      <tbody>
+        {% for s,cnt,qty,amt in rows %}
+        <tr>
+          <td>{{ s }}</td>
+          <td>{{ cnt }}</td>
+          <td>{{ '%.2f'|format(qty) }}</td>
+          <td>₹ {{ '%.2f'|format(amt) }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="table-light fw-bold">
+          <td>Total</td><td></td><td>{{ '%.2f'|format(total_qty) }}</td><td>₹ {{ '%.2f'|format(total_amt) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

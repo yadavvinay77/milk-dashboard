@@ -1,0 +1,16 @@
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <input type="date" name="from" class="form-control" value="{{ request.args.get('from', d_from|string if d_from else '') }}">
+  </div>
+  <div class="col-auto">
+    <input type="date" name="to" class="form-control" value="{{ request.args.get('to', d_to|string if d_to else '') }}">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary">Filter</button>
+  </div>
+  <div class="col-auto ms-auto">
+    <a class="btn btn-outline-secondary" href="?{{ request.query_string.decode()|replace('export=','') }}&export=csv">Export CSV</a>
+    <a class="btn btn-outline-secondary" href="?{{ request.query_string.decode()|replace('export=','') }}&export=xlsx">Export Excel</a>
+    <a class="btn btn-outline-dark" onclick="window.print()">Print</a>
+  </div>
+</form>

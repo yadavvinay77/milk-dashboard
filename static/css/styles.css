@@ -1,0 +1,63 @@
+/* Enhanced hover effects */
+.navbar .nav-link:hover { 
+    opacity: .85; 
+    transform: translateY(-1px); 
+    transition: all .15s; 
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+.table-hover tbody tr:hover { 
+    background: #f7f9fc; 
+    transform: scale(1.01);
+    transition: all 0.1s ease;
+}
+
+.btn:hover { 
+    filter: brightness(0.95); 
+    transform: translateY(-1px);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .mobile-view .table-responsive {
+        overflow-x: auto;
+        display: block;
+        width: 100%;
+    }
+    
+    .mobile-view .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .mobile-view .card-body {
+        padding: 1rem;
+    }
+    
+    .mobile-view .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* Print styles */
+@media print {
+  nav, .btn, form, .d-print-none { display: none !important; }
+  .card { border: none; box-shadow: none; }
+  body { background: #fff; }
+}
+
+/* Status badges */
+.badge-status-paid { background-color: #28a745; }
+.badge-status-credit { background-color: #ffc107; color: #000; }
+.badge-status-debit { background-color: #dc3545; }
+
+/* Back button */
+.back-button {
+    margin-bottom: 1rem;
+}

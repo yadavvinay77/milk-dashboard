@@ -1,0 +1,5 @@
+<div class="d-flex gap-2">
+  <a class="btn btn-outline-secondary" href="?{{ request.query_string.decode()|replace('export=','') }}&export=csv">Export CSV</a>
+  <a class="btn btn-outline-secondary" href="?{{ request.query_string.decode()|replace('export=','') }}&export=xlsx">Export Excel</a>
+  <button class="btn btn-outline-dark" onclick="window.print()">Print</button>
+</div>

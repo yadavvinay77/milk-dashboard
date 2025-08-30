@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3 class="mb-3">Milk History — {{ c.name }}</h3>
+
+<form class="row g-2 mb-3">
+  <div class="col-auto"><input type="date" name="from" class="form-control" value="{{ request.args.get('from','') }}"></div>
+  <div class="col-auto"><input type="date" name="to" class="form-control" value="{{ request.args.get('to','') }}"></div>
+  <div class="col-auto"><button class="btn btn-primary">Filter</button></div>
+  <div class="col-auto ms-auto">
+    <a class="btn btn-outline-secondary" href="?{{ request.query_string.decode()|replace('export=','') }}&export=csv">Export CSV</a>
+    <a class="btn btn-outline-secondary" href="?{{ request.query_string.decode()|replace('export=','') }}&export=xlsx">Export Excel</a>
+    <button class="btn btn-outline-dark" onclick="window.print()">Print</button>
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="card-body table-responsive">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>Date</th><th>Qty</th><th>SampleWt</th><th>Rate</th><th>Amount</th><th>Status</th><th>Credit</th><th>Debit</th><th>Note</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for x in logs %}
+        <tr>
+          <td>{{ x.date|dmy }}</td>
+          <td>{{ '%.2f'|format(x.quantity) }}</td>
+          <td>{{ '%.3f'|format(x.sample_weight) }}</td>
+          <td>{{ '%.2f'|format(x.rate) }}</td>
+          <td>₹ {{ '%.2f'|format(x.amount) }}</td>
+          <td>
+            {% set s = (x.status or '').lower() %}
+            <span class="badge {% if s=='paid' %}bg-success{% elif s=='credit' %}bg-warning text-dark{% elif s=='debit' %}bg-danger{% else %}bg-secondary{% endif %}">{{ x.status }}</span>
+          </td>
+          <td>{% if s == 'credit' %}₹ {{ '%.2f'|format(x.amount) }}{% else %}—{% endif %}</td>
+          <td>{% if s == 'debit' %}₹ {{ '%.2f'|format(x.amount) }}{% else %}—{% endif %}</td>
+          <td>{{ x.note }}</td>
+          <td>
+            <a href="{{ url_for('logs_bp.index') }}?date={{ x.date }}&edit={{ x.id }}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <form method="post" action="{{ url_for('logs_bp.delete', id=x.id) }}" class="d-inline" onsubmit="return confirm('Delete this transaction?')">
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td>Total</td>
+          <td>{{ '%.2f'|format(total_qty) }}</td>
+          <td></td>
+          <td></td>
+          <td>₹ {{ '%.2f'|format(total_amount) }}</td>
+          <td></td>
+          <td>₹ {{ '%.2f'|format(credit_total) }}</td>
+          <td>₹ {{ '%.2f'|format(debit_total) }}</td>
+          <td colspan="2">Balance: 
+            <span class="badge {% if balance >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+              ₹ {{ '%.2f'|format(balance) }}
+            </span>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endblock %}

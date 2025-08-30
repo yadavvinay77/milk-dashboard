@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>Transaction Invoice</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Radhey-Shyam Durgalay</h5>
+                    <p>Milk Supplier</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h5>Invoice</h5>
+                    <p>Date: {{ log.date|dmy }}</p>
+                    <p>Transaction #: {{ log.id }}</p>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Customer Details</h6>
+                    <p><strong>{{ log.customer.name }}</strong></p>
+                    <p>{{ log.customer.phone }}</p>
+                    <p>{{ log.customer.address }}</p>
+                </div>
+            </div>
+            
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Sample Weight</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Milk {{ log.status }}</td>
+                        <td>{{ '%.2f'|format(log.quantity) }} L</td>
+                        <td>{{ '%.3f'|format(log.sample_weight) }} kg/L</td>
+                        <td> {{ '%.2f'|format(log.rate) }}</td>
+                        <td> {{ '%.2f'|format(log.amount) }}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Total Amount:</strong></td>
+                        <td><strong> {{ '%.2f'|format(log.amount) }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Status:</strong></td>
+                        <td>
+                            <span class="badge {% if log.status.lower()=='paid' %}bg-success{% elif log.status.lower()=='credit' %}bg-warning text-dark{% elif log.status.lower()=='debit' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ log.status }}
+                            </span>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            {% if log.note %}
+            <div class="mt-3">
+                <h6>Note:</h6>
+                <p>{{ log.note }}</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-primary" onclick="window.print()">Print Invoice</button>
+            <a href="{{ url_for('logs_bp.index') }}" class="btn btn-secondary">Back to Daily Log</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

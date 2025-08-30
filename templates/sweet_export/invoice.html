@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Invoice</h3>
+    <div class="card p-4 mt-3">
+        <p><strong>Date:</strong> {{ tx.date|dmy }}</p>
+        <p><strong>Customer:</strong> {{ tx.customer.name }}</p>
+        <p><strong>Khoya Type:</strong> {{ tx.khoya_type }}</p>
+        <p><strong>Weight:</strong> {{ tx.weight }} kg</p>
+        <p><strong>Rate:</strong> {{ tx.rate }}</p>
+        <p><strong>Amount:</strong> {{ tx.amount }}</p>
+        <p><strong>Credit:</strong> {{ tx.credit }}</p>
+        <p><strong>Note:</strong> {{ tx.note }}</p>
+        <button onclick="window.print()" class="btn btn-success mt-2">Print Invoice</button>
+        <a href="{{ url_for('sweet_export_bp.index') }}" class="btn btn-secondary mt-2">Back</a>
+    </div>
+</div>
+{% endblock %}
