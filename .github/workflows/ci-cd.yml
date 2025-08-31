@@ -30,19 +30,19 @@ jobs:
 
     - name: Verify installations
       run: |
-        python -c "import flask; print(' Flask installed')"
-        python -c "import flask_sqlalchemy; print(' Flask-SQLAlchemy installed')"
-        python -c "import flask_migrate; print(' Flask-Migrate installed')"
-        python -c "import xlsxwriter; print(' XlsxWriter installed')"
-        python -c "import numpy; print(f' NumPy {numpy.__version__} installed')"
-        python -c "import pandas; print(f' Pandas {pandas.__version__} installed')"
+        python -c "import flask; print('✓ Flask installed')"
+        python -c "import flask_sqlalchemy; print('✓ Flask-SQLAlchemy installed')"
+        python -c "import flask_migrate; print('✓ Flask-Migrate installed')"
+        python -c "import xlsxwriter; print('✓ XlsxWriter installed')"
+        python -c "import numpy; print(f'✓ NumPy {numpy.__version__} installed')"
+        python -c "import pandas; print(f'✓ Pandas {pandas.__version__} installed')"
 
     - name: Run basic syntax check
       run: |
         python -m py_compile app.py
         python -m py_compile manage.py
         python -m py_compile config.py
-        echo " Basic syntax check passed"
+        echo "✓ Basic syntax check passed"
 
   deploy:
     runs-on: windows-latest
