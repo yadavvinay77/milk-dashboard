@@ -12,22 +12,6 @@ A comprehensive milk management system for Radhey-Shyam Durgalay.
 -  Invoice generation
 -  Mobile-responsive design
 
-## Version Control
-
-This project uses semantic versioning (MAJOR.MINOR.PATCH).
-
-### Version Management
-
-`ash
-# Bump patch version (bug fixes)
-.\version.ps1 patch
-
-# Bump minor version (new features)
-.\version.ps1 minor
-
-# Bump major version (breaking changes)
-.\version.ps1 major
-
 ## Deployment
 ```bash
 # Deploy specific version
