@@ -19,30 +19,38 @@ jobs:
       with:
         python-version: '3.11.9'
 
-    - name: Upgrade pip
+    - name: Upgrade pip and install build tools
       run: |
         python -m pip install --upgrade pip
-        pip install wheel setuptools
+        pip install setuptools wheel
 
-    - name: Install dependencies
+    - name: Install core dependencies
       run: |
-        pip install -r requirements.txt
+        pip install flask==2.3.3
+        pip install flask_sqlalchemy==3.0.5
+        pip install flask_migrate==4.0.5
+        pip install XlsxWriter==3.1.2
 
-    - name: Verify installations
+    - name: Install compatible pandas and numpy
       run: |
-        python -c "import flask; print('✓ Flask installed')"
-        python -c "import flask_sqlalchemy; print('✓ Flask-SQLAlchemy installed')"
-        python -c "import flask_migrate; print('✓ Flask-Migrate installed')"
-        python -c "import xlsxwriter; print('✓ XlsxWriter installed')"
-        python -c "import numpy; print(f'✓ NumPy {numpy.__version__} installed')"
-        python -c "import pandas; print(f'✓ Pandas {pandas.__version__} installed')"
+        pip install "numpy<1.24"  # Use older compatible version
+        pip install "pandas<2.0"   # Use older compatible version
+
+    - name: Verify core installations
+      run: |
+        python -c "import flask; print('FLASK: OK')"
+        python -c "import flask_sqlalchemy; print('FLASK_SQLALCHEMY: OK')"
+        python -c "import flask_migrate; print('FLASK_MIGRATE: OK')"
+        python -c "import pandas; print('PANDAS: OK - version ' + pandas.__version__)"
+        python -c "import numpy; print('NUMPY: OK - version ' + numpy.__version__)"
+        python -c "import xlsxwriter; print('XLSXWRITER: OK')"
 
     - name: Run basic syntax check
       run: |
         python -m py_compile app.py
         python -m py_compile manage.py
         python -m py_compile config.py
-        echo "✓ Basic syntax check passed"
+        echo "SYNTAX_CHECK: PASSED"
 
   deploy:
     runs-on: windows-latest
@@ -64,6 +72,6 @@ jobs:
 
     - name: Display deployment info
       run: |
-        echo "Deployment successful!"
-        echo "Branch: ${{ github.ref }}"
-        echo "Commit: ${{ github.sha }}"
+        echo "DEPLOYMENT: SUCCESSFUL"
+        echo "BRANCH: ${{ github.ref }}"
+        echo "COMMIT: ${{ github.sha }}"
